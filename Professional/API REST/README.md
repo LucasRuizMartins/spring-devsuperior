@@ -147,7 +147,7 @@ A Camada Service é a que irá fazer os acessos aos BD's e fazer a manipulação
 [MODEL MAPPER](https://www.youtube.com/watch?v=2Iqo7rzNm-o)
 
 
-### Retornar Paginas : < Pageable pageable >
+### --- Retornar Paginas : < Pageable pageable > ---
 
 `http://localhost:8080/products?size=12&page=0&sort=name,desc`
 
@@ -164,4 +164,72 @@ A Camada Service é a que irá fazer os acessos aos BD's e fazer a manipulação
 	public Page<ProductDTO> findAll(Pageable pageable){  
 		Page<Product> products = repository.findAll(pageable);  
 		return products.map(x -> new ProductDTO(x));  
+	}
+	
+---
+
+###  --- INSERT ---
+
+O @RequestBody é utilizado para a aplicação receber um JSON como parametro 
+
+	{
+		"name":  "caneta azul",
+		"description":  "azul caneta, caneta azul, tem até musica propria a caneta azul",
+		"imgUrl":"https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg",
+		"price":  1110.00
+	}
+
+**CONTROLLER** 
+
+	@PostMapping  
+	public ProductDTO insert(@RequestBody ProductDTO dto){  
+		return service.insert(dto);  
+	}
+
+**SERVICE** 
+
+	@Transactional  
+	public ProductDTO insert(ProductDTO dto){   
+		Product entity = new Product();  
+		entity.setName(dto.getName());  
+		entity.setDescription(dto.getDescription());  
+		entity.setPrice(dto.getPrice());  
+		entity.setImgUrl(dto.getImgUrl());  
+		entity = repository.save(entity);  
+		return new ProductDTO((entity));  
+	}
+
+
+
+---
+### --- Customizando respostas ---
+
+**---200--- SUCESS**
+
+Para obter uma resposta HTTP deve ser utilizado o Objeto ResponseEntity no Controller
+
+	@GetMapping(value = "/{id}")  
+		public ResponseEntity<ProductDTO> findById(@PathVariable Long id){  
+		ProductDTO dto = service.findById(id);  
+		return ResponseEntity.ok(dto);  
+	}
+
+**Em caso de Listas**
+
+	@GetMapping  
+	public ResponseEntity<Page<ProductDTO>> findById(Pageable pageable){  
+		Page<ProductDTO> dto = service.findAll(pageable);  
+		return ResponseEntity.ok(dto);  
+	}
+
+**---201--- INSERT** 
+
+para retornar o uri já na requisição do insert deve se usar o ServletUriComponentsBuilder
+
+	@PostMapping  
+	public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO dto){  
+		dto = service.insert(dto);  
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")  
+				  .buildAndExpand(dto.getId()).toUri();  
+		return ResponseEntity.created(uri).body(dto);  
 	}
