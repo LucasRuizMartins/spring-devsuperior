@@ -143,6 +143,6 @@ blocos de horários (por exemplo: um curso de HTML pode ocorrer em dois blocos, 
 armazenar o dia e os horários de início de fim do bloco daquele dia). Para cada participante, deseja-se
 cadastrar seu nome e email.
 
-![uml-1](/docs-estudos/UML-1.png)
+![uml-1](https://github.com/LucasRuizMartins/spring-devsuperior/blob/main/Professional/modelo-dominio-orm/docs-estudos/UML-1.png?raw=true)
 
-![uml-2](/docs-estudos/UML-2.png)
+![uml-2](https://github.com/LucasRuizMartins/spring-devsuperior/blob/main/Professional/modelo-dominio-orm/docs-estudos/UML-2.png?raw=true)
