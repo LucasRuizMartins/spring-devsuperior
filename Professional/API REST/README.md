@@ -92,13 +92,9 @@ Padrões:
 
 # Repository
 
-criar um repository no spring é através de uma interface 
-JPA REPOSITORY<TIPO, TIPOID>
+criar um repository no spring é através de uma interface JpaRepository<Product,Long>
 
-	package com.devsuperior.dscommerce.repositories;  
-	  
-	import com.devsuperior.dscommerce.entities.Product;  
-	import org.springframework.data.jpa.repository.JpaRepository;
+
 
 	public interface ProductRepository extends JpaRepository<Product,Long> {  
 	}
@@ -108,8 +104,8 @@ Retorna um tipo Otional
 
 	public String teste(){  
 	Optional<Product> result = repository.findById(1L);  
-	Product product = result.get();  
-	return product.getName();  
+		Product product = result.get();  
+		return product.getName();  
 	}
 
 # DTO Data Transfer Object 
@@ -143,4 +139,29 @@ A Camada Service é a que irá fazer os acessos aos BD's e fazer a manipulação
 	public ProductDTO findById(Long id){  
 		Product product= repository.findById(id).get();  
 		return new ProductDTO(product);  
+	}
+
+## Outras referencias 
+
+**Biblioteca que auxilia a Criar um DTO com muitas atributos** 
+[MODEL MAPPER](https://www.youtube.com/watch?v=2Iqo7rzNm-o)
+
+
+### Retornar Paginas : < Pageable pageable >
+
+`http://localhost:8080/products?size=12&page=0&sort=name,desc`
+
+**CONTROLLER**
+
+	@GetMapping  
+	public Page<ProductDTO> findById(Pageable pageable){  
+		return service.findAll(pageable);  
+	}
+
+**SERVICE**
+
+	@Transactional(readOnly = true)  
+	public Page<ProductDTO> findAll(Pageable pageable){  
+		Page<Product> products = repository.findAll(pageable);  
+		return products.map(x -> new ProductDTO(x));  
 	}
