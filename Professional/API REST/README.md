@@ -233,3 +233,11 @@ para retornar o uri já na requisição do insert deve se usar o ServletUriCompo
 				  .buildAndExpand(dto.getId()).toUri();  
 		return ResponseEntity.created(uri).body(dto);  
 	}
+**204 --DELETE--**
+caso nao tenha corpo, como no caso do delete o http é 204 nesse caso será o .noContent().build
+
+	@DeleteMapping(value ="/{id}")  
+	public ResponseEntity<Void> delete(@PathVariable Long id){  
+		service.delete(id);  
+		return ResponseEntity.noContent().build();  
+	}
