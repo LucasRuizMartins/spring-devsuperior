@@ -3,7 +3,7 @@
 é o conjunto de funcionalidades que são expostas por uma aplicação/Módulo para ser acessada por outra aplicação/Modulo. 
 
 **API WEB** é uma API disponibilizada via WEB. Suas funcionalidades são acessasdas por meio de endpoints (endereços) web 
-Por exemplo: *https:facebook.com/user/100*
+Por exemplo: `https:facebook.com/user/100`
 
 **[API REST](https://www.redhat.com/pt-br/topics/api/what-is-a-rest-api)** ➞ O Padrão REST é referente a algumas regras 
 - Cliente servidor HTTP/HTTPS
@@ -36,6 +36,16 @@ Padrões:
 -  Redirecionamentos (300-399) 
 -  Erros do cliente (400-499) 
 -  Erros do servidor (500-599)
+
+erros mais comuns
+
+- 400 - Bad Request (erro Genérico)
+- 401 - Unauthorized (falha naautenticação)
+- 403 - Forbidden (acesso negado)
+- 404 - Not Found
+- 409 - Conflict 
+- 415 - Unsupported Media Type 
+- 422 - Unprocessable entity  
 
 
 
@@ -87,6 +97,31 @@ Padrões:
 	@GetMapping(value = "/{id}")  
 		public ProductDTO findById(@PathVariable Long id){  
 		return service.findById(id);  
+	}
+
+
+
+### Tratamento de erros 
+
+Criar um customError como o abaixo (é o corpo do error) 	
+	
+	private Instant timestamp;  
+	private Integer status;  
+	private String error;  
+	private String path;
+
+
+
+Criar um Handler a nivel de controlador como o exemplo a baixo  
+	
+	@ControllerAdvice  
+	public class ControllerExceptionHandler {  
+	@ExceptionHandler(ResourceNotFundException.class)  
+		public ResponseEntity<CustomError> customName(ResourceNotFundException e, HttpServletRequest request) {  
+			HttpStatus status = HttpStatus.NOT_FOUND;  
+			CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI() );  
+			return ResponseEntity.status(status).body(err);  
+		}  
 	}
 
 
