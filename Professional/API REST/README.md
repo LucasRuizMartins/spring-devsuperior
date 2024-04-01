@@ -124,6 +124,24 @@ Criar um Handler a nivel de controlador como o exemplo a baixo
 		}  
 	}
 
+**delete** 
+Para fazer o tratamento do delete primeiro precisa verificar se o id existe através do existsById
+também é necessario tratar a falha de integridade referencial "DataIntegrityViolationException" para isso funcionar precisa-se usar o propagation.supports, para que se propague para o BDD. 
+
+	@Transactional(propagation = Propagation.SUPPORTS)  
+	public void delete(Long id) {  
+		if (!repository.existsById(id)) {  
+			throw new ResourceNotFundException("Recurso não encontrado");  
+		}  
+		try {  
+			repository.deleteById(id);  
+		}  
+		catch (DataIntegrityViolationException e) {  
+			throw new DatabaseException("Falha de integridade referencial");  
+		}  
+	}
+
+
 
 # Repository
 
@@ -143,7 +161,7 @@ Retorna um tipo Otional
 		return product.getName();  
 	}
 
-# DTO Data Transfer Object 
+### DTO Data Transfer Object 
 
 Um objeto simplificado não gerenciado por uma LIB de orm e usado para transferência de dados e pode ser alinhado com outros **DTO's**
 
@@ -175,8 +193,8 @@ A Camada Service é a que irá fazer os acessos aos BD's e fazer a manipulação
 		Product product= repository.findById(id).get();  
 		return new ProductDTO(product);  
 	}
-
-## Outras referencias 
+--- 
+### Outras referencias 
 
 **Biblioteca que auxilia a Criar um DTO com muitas atributos** 
 [MODEL MAPPER](https://www.youtube.com/watch?v=2Iqo7rzNm-o)
@@ -276,3 +294,96 @@ caso nao tenha corpo, como no caso do delete o http é 204 nesse caso será o .n
 		service.delete(id);  
 		return ResponseEntity.noContent().build();  
 	}
+
+
+### Validações 
+
+
+[Bean Validation](https://jakarta.ee/specifications/bean-validation/3.0/) 
+[Constraints](https://jakarta.ee/specifications/bean-validation/3.0/apidocs/)
+[Tutorial](https://javaee.github.io/tutorial/bean-validation.html)
+
+Dependencias 
+
+	<dependency>
+		<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		<version>3.0.2</version>
+	</dependency>
+	
+	<dependency> 
+		<groupId> 
+			org.springframework.boot
+		</groupId> 
+		<artifactId>
+			spring-boot-starter-validation
+		</artifactId> 
+	</dependency>
+
+	
+	<dependency>
+		<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		<version>8.0.0.CR2</version>
+	</dependency>
+
+As validações devem ser feitas no DTO uma vez que ele que é trafegado via web necessario implantar a anotation @Valid no Controller
+
+Para passar os erros de forma dinamica é necessario criar uma classe de mensagem de erro e uma Classe de erro para ter uma lista dessas mensagens, no caso do projeto DSCOmerce é a Validation Error 
+
+**FieldMessage** 
+
+	 class FieldMessage {  
+	  
+		private String fieldName;  
+		private String message;  
+		  
+		public FieldMessage(String fieldName, String message) {  
+			this.fieldName = fieldName;  
+			this.message = message;  
+		}  
+		  
+		public String getFieldName() {  
+			return fieldName;  
+		}  
+		  
+		public String getMessage() {  
+			return message;  
+		}  
+	}
+
+
+
+
+**Validation Error**
+
+	public class ValidationError extends CustomError{  
+  
+		private List<FieldMessage> errors = new ArrayList<>();  
+		public ValidationError(Instant timestamp, Integer status, String error, String path) {  
+			super(timestamp, status, error, path);  
+			}  
+		  
+			public List<FieldMessage> getErrors() {  
+				return errors;  
+			}  
+		  
+			public void addError(String fieldName, String message) {  
+				errors.add(new FieldMessage(fieldName,message));  
+			}  
+		}
+
+
+**ExceptionHandler** 
+	
+		@ExceptionHandler( MethodArgumentNotValidException.class)  
+		public ResponseEntity<CustomError> methodArgumentNotValid( MethodArgumentNotValidException e, HttpServletRequest request) {  
+			HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;  
+			ValidationError err = new ValidationError(Instant.now(), status.value(),"Dados inválidos", request.getRequestURI() );  
+			
+			for(FieldError f : e.getBindingResult().getFieldErrors()) {  
+				err.addError(f.getField(), f.getDefaultMessage());  
+			}  
+			
+			return ResponseEntity.status(status).body(err);  
+		} 
