@@ -2,6 +2,7 @@ package com.clientManagement.clientmanagement.dto;
 
 import com.clientManagement.clientmanagement.entities.Client;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 
@@ -11,9 +12,13 @@ public class ClientDTO {
 
     @NotBlank(message = "Campo Obrigatório")
     String name;
+
+
     String cpf;
 
     Double income;
+
+    @PastOrPresent
     LocalDate birthDate;
     Integer children;
 

@@ -42,7 +42,6 @@ public class ProductService {
         return new ProductDTO((entity));
 
     }
-
     @Transactional
     public ProductDTO update(Long id, ProductDTO dto) {
         try {
@@ -55,6 +54,7 @@ public class ProductService {
         }
 
     }
+
 
     private void copyDtoToEntity(ProductDTO dto, Product entity) {
         entity.setName(dto.getName());

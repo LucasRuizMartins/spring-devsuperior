@@ -1,9 +1,9 @@
-package com.devsuperior.dscommerce.controllers.handlers;
+package com.clientManagement.clientmanagement.controllers.handlers;
 
-import com.devsuperior.dscommerce.dto.CustomError;
-import com.devsuperior.dscommerce.dto.ValidationError;
-import com.devsuperior.dscommerce.services.exceptions.DatabaseException;
-import com.devsuperior.dscommerce.services.exceptions.ResourceNotFundException;
+import com.clientManagement.clientmanagement.dto.CustomError;
+import com.clientManagement.clientmanagement.dto.ValidationError;
+import com.clientManagement.clientmanagement.service.exceptions.ClientNotFoundException;
+import com.clientManagement.clientmanagement.service.exceptions.DuplicatedCpfException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +16,16 @@ import java.time.Instant;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
-    @ExceptionHandler(ResourceNotFundException.class)
-    public ResponseEntity<CustomError> customName(ResourceNotFundException e, HttpServletRequest request) {
+
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ResponseEntity<CustomError> customName(ClientNotFoundException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI() );
         return ResponseEntity.status(status).body(err);
     }
 
-    @ExceptionHandler(DatabaseException.class)
-    public ResponseEntity<CustomError> dataBase(DatabaseException e, HttpServletRequest request) {
+    @ExceptionHandler(DuplicatedCpfException.class)
+    public ResponseEntity<CustomError> duplicatedCpfException(DuplicatedCpfException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI() );
         return ResponseEntity.status(status).body(err);
